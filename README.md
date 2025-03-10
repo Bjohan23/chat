@@ -112,8 +112,10 @@ chat/
 
 ## 📱 Capturas de Pantalla
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Bjohan23/chat/main/.github/images/screenshot-light.png" alt="Modo Claro" width="45%" />
-  <img src="https://raw.githubusercontent.com/Bjohan23/chat/main/.github/images/screenshot-dark.png" alt="Modo Oscuro" width="45%" />
+  
+  ![image](https://github.com/user-attachments/assets/654f4886-e77f-4f4a-a9f5-944860aec995)
+![image](https://github.com/user-attachments/assets/af81449e-1b48-4e17-a18e-1d20dbfb8c93)
+
 </div>
 
 ## 🔍 Uso
