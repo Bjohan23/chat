@@ -3,8 +3,7 @@ import GroupList from '../components/Groups/GroupList';
 
 const GroupsPage = () => {
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Grupos de Chat</h1>
+    <div className="min-h-screen bg-theme-bg-primary pt-20 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
       <GroupList />
     </div>
   );

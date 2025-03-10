@@ -2,20 +2,25 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSocket } from '../../hooks/useSocket';
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../context/ThemeContext';
 import GroupsAPI from '../../api/groups';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import toast from 'react-hot-toast';
+import { FiArrowLeft, FiUsers, FiInfo } from 'react-icons/fi';
 
 const ChatBox = () => {
   const { groupId } = useParams();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const { theme } = useTheme();
   const { socket, connected, joinGroup, leaveGroup, sendMessage } = useSocket();
   
   const [group, setGroup] = useState(null);
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [onlineUsers, setOnlineUsers] = useState(0);
+  const [showInfo, setShowInfo] = useState(false);
 
   // Referencia para mantener el estado actual en los event listeners
   const messagesRef = useRef(messages);
@@ -76,14 +81,23 @@ const ChatBox = () => {
       }
     };
     
+    // Actualización de usuarios en línea
+    const handleOnlineUsers = (data) => {
+      if (data.groupId.toString() === groupId.toString()) {
+        setOnlineUsers(data.count);
+      }
+    };
+    
     // Suscribirse a eventos
     socket.on('groupHistory', handleGroupHistory);
     socket.on('newMessage', handleNewMessage);
+    socket.on('onlineUsers', handleOnlineUsers);
     
     // Limpiar suscripciones
     return () => {
       socket.off('groupHistory', handleGroupHistory);
       socket.off('newMessage', handleNewMessage);
+      socket.off('onlineUsers', handleOnlineUsers);
     };
   }, [socket, groupId]);
 
@@ -127,19 +141,28 @@ const ChatBox = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-40">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+      <div className="flex justify-center items-center h-screen pt-16">
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-theme-text-secondary">Cargando chat...</p>
+        </div>
       </div>
     );
   }
 
   if (!group) {
     return (
-      <div className="text-center p-8">
-        <p className="text-red-500">Grupo no encontrado</p>
+      <div className="flex flex-col items-center justify-center h-screen pt-16 px-4">
+        <div className="w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center mb-4">
+          <FiInfo className="h-8 w-8 text-red-500 dark:text-red-300" />
+        </div>
+        <h2 className="text-xl font-bold text-theme-text-primary mb-2">Grupo no encontrado</h2>
+        <p className="text-theme-text-secondary mb-6 text-center">
+          Este grupo no existe o ha sido eliminado.
+        </p>
         <button
           onClick={() => navigate('/groups')}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+          className="btn btn-primary"
         >
           Volver a la lista de grupos
         </button>
@@ -148,29 +171,58 @@ const ChatBox = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)]">
-      <div className="border-b p-4 flex justify-between items-center">
-        <div>
-          <h2 className="text-xl font-bold">{group.name}</h2>
-          {group.description && (
-            <p className="text-sm text-gray-600">{group.description}</p>
-          )}
+    <div className="flex flex-col h-screen pt-16">
+      <div className="border-b border-theme-border p-4 flex justify-between items-center bg-theme-bg-primary">
+        <div className="flex items-center">
+          <button
+            onClick={() => navigate('/groups')}
+            className="mr-3 p-2 rounded-full text-theme-text-secondary hover:bg-theme-hover hover:text-theme-text-primary transition-colors duration-200"
+            aria-label="Volver"
+          >
+            <FiArrowLeft className="h-5 w-5" />
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-theme-text-primary">{group.name}</h2>
+            <div className="flex items-center text-sm text-theme-text-secondary">
+              <FiUsers className="mr-1" /> {onlineUsers} online
+              {group.description && (
+                <button 
+                  className="ml-3 text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  onClick={() => setShowInfo(!showInfo)}
+                >
+                  {showInfo ? 'Ocultar info' : 'Ver info'}
+                </button>
+              )}
+            </div>
+          </div>
         </div>
-        <button
-          onClick={() => navigate('/groups')}
-          className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 transition"
-        >
-          Volver
-        </button>
       </div>
       
-      <MessageList messages={messages} currentUser={user} groupId={groupId} />
+      {showInfo && group.description && (
+        <div className="p-4 bg-theme-bg-secondary border-b border-theme-border animate-slide-down">
+          <div className="max-w-3xl mx-auto">
+            <h3 className="font-medium text-theme-text-primary mb-2">Acerca de este grupo</h3>
+            <p className="text-theme-text-secondary text-sm">{group.description}</p>
+            <div className="mt-2 text-xs text-theme-text-secondary">
+              Creado el {new Date(group.createdAt).toLocaleDateString()}
+            </div>
+          </div>
+        </div>
+      )}
       
-      <div className="border-t p-3">
+      <MessageList 
+        messages={messages} 
+        currentUser={user} 
+        groupId={groupId} 
+        theme={theme}
+      />
+      
+      <div className="border-t border-theme-border p-3 bg-theme-bg-primary">
         <MessageInput 
           onSendMessage={handleSendMessage}
           onSendMediaMessage={handleSendMediaMessage}
           disabled={!connected || !isAuthenticated} 
+          theme={theme}
         />
       </div>
     </div>

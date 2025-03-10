@@ -12,8 +12,8 @@ const LoginPage = () => {
   }
   
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold text-center mb-8">Iniciar Sesión</h1>
+    <div className="min-h-screen bg-theme-bg-primary pt-24 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+      <h1 className="text-3xl font-bold text-center mb-8 text-theme-text-primary">Iniciar Sesión</h1>
       <LoginForm />
     </div>
   );

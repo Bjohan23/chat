@@ -2,25 +2,119 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Variables de tema para modo claro (por defecto) */
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --bg-primary: #ffffff;
+  --bg-secondary: #f3f4f6;
+  --bg-accent: #3b82f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --border: #e5e7eb;
+  --hover: #dbeafe;
+  --animation-timing: 0.2s;
+}
+
+/* Variables de tema para modo oscuro */
+.dark {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-accent: #3b82f6;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+  --border: #374151;
+  --hover: #172554;
+}
+
+:root {
+  font-family: 'Inter', sans-serif;
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
+  @apply bg-theme-bg-primary text-theme-text-primary transition-colors duration-200;
+}
+
+/* Transiciones */
+.theme-transition {
+  transition: background-color var(--animation-timing) ease-in-out,
+              color var(--animation-timing) ease-in-out,
+              border-color var(--animation-timing) ease-in-out,
+              box-shadow var(--animation-timing) ease-in-out;
 }
 
 /* Estilos personalizados para mensajes de chat */
 .message-bubble {
-  @apply max-w-[80%] rounded-lg p-3 my-1;
+  @apply max-w-[80%] rounded-lg p-3 my-1 transition-all duration-200;
 }
 
-.message-mine {
-  @apply bg-blue-500 text-white ml-auto rounded-bl-lg rounded-tl-lg rounded-tr-lg;
+.light .message-mine {
+  @apply bg-blue-600 text-white ml-auto rounded-bl-lg rounded-tl-lg rounded-tr-lg;
 }
 
-.message-others {
+.light .message-others {
   @apply bg-gray-200 text-gray-800 mr-auto rounded-br-lg rounded-tr-lg rounded-tl-lg;
+}
+
+.dark .message-mine {
+  @apply bg-blue-700 text-white ml-auto rounded-bl-lg rounded-tl-lg rounded-tr-lg;
+}
+
+.dark .message-others {
+  @apply bg-gray-700 text-gray-100 mr-auto rounded-br-lg rounded-tr-lg rounded-tl-lg;
+}
+
+/* Animaciones */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Estilos para scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-theme-bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-theme-text-secondary rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-theme-bg-accent;
+}
+
+/* Clases de utilidad personalizadas */
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-all duration-200;
+  }
+  
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-700 dark:hover:bg-blue-800;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white;
+  }
+  
+  .card {
+    @apply bg-theme-bg-primary border border-theme-border rounded-lg shadow-soft transition-all duration-200;
+  }
+  
+  .input {
+    @apply px-4 py-2 bg-theme-bg-primary text-theme-text-primary border border-theme-border rounded-md 
+           focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200;
+  }
 }
