@@ -1,0 +1,23 @@
+# Node.js
+node_modules/
+package-lock.json
+
+# Entorno
+.env
+
+# Archivos de construcción y dependencias
+dist/
+build/
+
+# Configuración del editor de código
+.vscode/
+.idea/
+*.log
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Cachés y dependencias de Vite y Tailwind
+.vite/
+.tailwind/
