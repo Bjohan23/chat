@@ -87,7 +87,7 @@ const ChatBox = () => {
     };
   }, [socket, groupId]);
 
-  // Manejar envío de mensajes
+  // Manejar envío de mensajes de texto
   const handleSendMessage = (text) => {
     if (!text.trim()) return;
     
@@ -101,6 +101,28 @@ const ChatBox = () => {
     if (!result.success) {
       toast.error(result.error || 'Error al enviar el mensaje');
     }
+  };
+
+  // Manejar envío de mensajes multimedia
+  const handleSendMediaMessage = (mediaData) => {
+    if (!isAuthenticated) {
+      toast.error('Debes iniciar sesión para enviar archivos');
+      return Promise.reject(new Error('No autenticado'));
+    }
+    
+    return new Promise((resolve, reject) => {
+      if (socket && connected) {
+        socket.emit('sendMediaMessage', {
+          groupId,
+          ...mediaData
+        });
+        resolve();
+      } else {
+        const error = 'No hay conexión con el servidor';
+        toast.error(error);
+        reject(new Error(error));
+      }
+    });
   };
 
   if (loading) {
@@ -142,18 +164,14 @@ const ChatBox = () => {
         </button>
       </div>
       
-      <MessageList messages={messages} currentUser={user} />
+      <MessageList messages={messages} currentUser={user} groupId={groupId} />
       
       <div className="border-t p-3">
         <MessageInput 
-          onSendMessage={handleSendMessage} 
+          onSendMessage={handleSendMessage}
+          onSendMediaMessage={handleSendMediaMessage}
           disabled={!connected || !isAuthenticated} 
         />
-        {!isAuthenticated && (
-          <p className="text-xs text-center text-gray-500 mt-2">
-            Debes <a href="/login" className="text-blue-500">iniciar sesión</a> para enviar mensajes
-          </p>
-        )}
       </div>
     </div>
   );

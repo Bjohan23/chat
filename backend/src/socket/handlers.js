@@ -43,7 +43,8 @@ const socketHandlers = (io, socket) => {
     const message = Group.addMessage(parseInt(groupId), {
       text,
       userId: socket.user.id,
-      username: socket.user.username
+      username: socket.user.username,
+      type: 'text'
     });
     
     // Emitir mensaje a todos los miembros del grupo
@@ -51,6 +52,62 @@ const socketHandlers = (io, socket) => {
       groupId,
       message
     });
+  });
+
+  // Manejar envío de archivos multimedia
+  socket.on('sendMediaMessage', (data) => {
+    const { groupId, fileData, fileType, fileName, messageText } = data;
+    
+    // Verificar autenticación
+    if (!socket.auth) {
+      socket.emit('error', { message: 'Debes iniciar sesión para enviar archivos' });
+      return;
+    }
+    
+    const group = Group.findById(parseInt(groupId));
+    if (!group) {
+      socket.emit('error', { message: 'Grupo no encontrado' });
+      return;
+    }
+
+    try {
+      // Determinar el tipo de mensaje basado en el tipo de archivo
+      let messageType = 'file';
+      if (fileType.startsWith('image/')) messageType = 'image';
+      else if (fileType.startsWith('video/')) messageType = 'video';
+      else if (fileType.startsWith('audio/')) messageType = 'audio';
+      
+      // Guardar el archivo en memoria
+      const mediaId = Group.saveMediaFile(
+        parseInt(groupId),
+        fileData, // Base64 string
+        fileType,
+        fileName,
+        socket.user.id
+      );
+      
+      // Añadir mensaje con referencia al archivo
+      const message = Group.addMessage(parseInt(groupId), {
+        text: messageText || fileName,
+        userId: socket.user.id,
+        username: socket.user.username,
+        type: messageType,
+        mediaId,
+        fileName,
+        fileType,
+        fileSize: fileData.length
+      });
+      
+      // Emitir mensaje a todos los miembros del grupo
+      io.to(`group:${groupId}`).emit('newMessage', {
+        groupId,
+        message
+      });
+      
+    } catch (error) {
+      console.error('Error al procesar archivo multimedia:', error);
+      socket.emit('error', { message: 'Error al procesar el archivo' });
+    }
   });
   
   // Manejo de desconexión

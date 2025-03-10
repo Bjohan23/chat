@@ -9,6 +9,7 @@ dotenv.config();
 // Importar rutas
 const authRoutes = require('./routes/auth');
 const groupRoutes = require('./routes/group');
+const mediaRoutes = require('./routes/media'); // Nueva ruta para archivos multimedia
 
 // Importar configuración de Socket.IO
 const setupSocket = require('./socket');
@@ -19,12 +20,13 @@ const server = http.createServer(app);
 
 // Configuración de middleware
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' })); // Aumentar límite para archivos grandes
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Configurar rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/api/media', mediaRoutes); // Añadir rutas para archivos multimedia
 
 // Ruta de bienvenida
 app.get('/', (req, res) => {

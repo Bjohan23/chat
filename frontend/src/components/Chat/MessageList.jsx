@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
+import { FiFile, FiDownload } from 'react-icons/fi';
 
-const MessageList = ({ messages, currentUser }) => {
+const MessageList = ({ messages, currentUser, groupId }) => {
   const messagesEndRef = useRef(null);
   
   // Desplazar hacia abajo cuando hay nuevos mensajes
@@ -21,6 +22,85 @@ const MessageList = ({ messages, currentUser }) => {
   // Determinar si un mensaje es del usuario actual
   const isCurrentUserMessage = (message) => {
     return currentUser && message.userId === currentUser.id;
+  };
+
+  // Generar URL para archivos multimedia
+  const getMediaUrl = (message) => {
+    return `/api/media/${groupId}/${message.mediaId}`;
+  };
+  
+  // Renderizar contenido del mensaje según su tipo
+  const renderMessageContent = (message) => {
+    switch (message.type) {
+      case 'image':
+        return (
+          <div className="my-1">
+            <img 
+              src={getMediaUrl(message)} 
+              alt={message.fileName || "Imagen"} 
+              className="max-w-full rounded-md max-h-64 object-contain cursor-pointer"
+              onClick={() => window.open(getMediaUrl(message), '_blank')}
+            />
+            {message.text && message.text !== message.fileName && (
+              <p className="mt-1">{message.text}</p>
+            )}
+          </div>
+        );
+        
+      case 'video':
+        return (
+          <div className="my-1">
+            <video 
+              src={getMediaUrl(message)} 
+              controls 
+              className="max-w-full rounded-md max-h-64"
+            />
+            {message.text && message.text !== message.fileName && (
+              <p className="mt-1">{message.text}</p>
+            )}
+          </div>
+        );
+        
+      case 'audio':
+        return (
+          <div className="my-1">
+            <audio 
+              src={getMediaUrl(message)} 
+              controls 
+              className="w-full"
+            />
+            {message.text && message.text !== message.fileName && (
+              <p className="mt-1">{message.text}</p>
+            )}
+          </div>
+        );
+        
+      case 'file':
+        return (
+          <div className="my-1">
+            <div className="flex items-center bg-gray-100 p-2 rounded">
+              <FiFile className="mr-2 flex-shrink-0" />
+              <span className="mr-2 truncate flex-grow">{message.fileName}</span>
+              <a 
+                href={getMediaUrl(message)} 
+                download={message.fileName}
+                className="text-blue-500 hover:text-blue-700"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FiDownload />
+              </a>
+            </div>
+            {message.text && message.text !== message.fileName && (
+              <p className="mt-1">{message.text}</p>
+            )}
+          </div>
+        );
+        
+      case 'text':
+      default:
+        return <div>{message.text}</div>;
+    }
   };
   
   return (
@@ -43,7 +123,9 @@ const MessageList = ({ messages, currentUser }) => {
                 {!isCurrentUserMessage(message) && (
                   <div className="font-bold text-xs mb-1">{message.username}</div>
                 )}
-                <div>{message.text}</div>
+                
+                {renderMessageContent(message)}
+                
                 <div className="text-xs opacity-70 text-right mt-1">
                   {formatTime(message.timestamp)}
                 </div>

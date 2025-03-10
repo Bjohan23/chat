@@ -48,7 +48,7 @@ export const SocketProvider = ({ children }) => {
     }
   };
 
-  // Enviar mensaje a un grupo
+  // Enviar mensaje de texto a un grupo
   const sendMessage = (groupId, text) => {
     if (socket && connected) {
       if (!isAuthenticated) {
@@ -56,6 +56,20 @@ export const SocketProvider = ({ children }) => {
       }
       
       socket.emit('sendMessage', { groupId, text });
+      return { success: true };
+    }
+    
+    return { success: false, error: 'No hay conexión con el servidor' };
+  };
+
+  // Enviar mensaje multimedia a un grupo
+  const sendMediaMessage = (groupId, mediaData) => {
+    if (socket && connected) {
+      if (!isAuthenticated) {
+        return { success: false, error: 'Debes iniciar sesión para enviar archivos' };
+      }
+      
+      socket.emit('sendMediaMessage', { groupId, ...mediaData });
       return { success: true };
     }
     
@@ -70,7 +84,8 @@ export const SocketProvider = ({ children }) => {
         authStatus,
         joinGroup,
         leaveGroup,
-        sendMessage
+        sendMessage,
+        sendMediaMessage
       }}
     >
       {children}
